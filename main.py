@@ -10,6 +10,9 @@ from aiosmtpd.smtp import Envelope as SMTPEnvelope
 from aiosmtpd.smtp import Session as SMTPSession
 from aiosmtpd.controller import Controller
 from dkim import verify
+from time import sleep, time
+from hashlib import sha256
+from hmac import digest
 
 host = environ.get('HOST','0.0.0.0')
 port = environ.get('PORT',25)
@@ -21,19 +24,25 @@ spf_allow_list = environ.get('SPF_ALLOW_LIST',[])
 if spf_allow_list:
     spf_allow_list = loads(spf_allow_list)
 
+dkim_reject = environ.get('DKIM_REJECT',None)
+
 ident = environ.get('IDENT','')
 email_size = environ.get('EMAIL_SIZE',5048576)
 log_off = environ.get('LOG_OFF',None)
 
 webhook = environ.get('WEBHOOK_URL',None)
+webhook_headers = environ.get('WEBHOOK_HEADERS',{})
+if webhook_headers:
+    webhook_headers = loads(webhook_headers)
 
+hmac_secret = environ.get('HMAC_SECRET',None)
 
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
 
         if target_email:
             if not address.endswith(target_email):
-                return '550 Not accepting for that domain'
+                return '556 Not accepting for that domain'
         
         if source_email:
             if not envelope.mail_from.endswith(source_email):
@@ -59,9 +68,13 @@ class InboundChecker:
         email:MIMEPart = Parser(policy=default).parsestr(envelope.content.decode('utf8', errors='replace'))
 
         dkimverify = verify(envelope.content)
-
-        def payload(type):
-            body = email.get_body(preferencelist=(type))
+        
+        if dkim_reject:
+            if dkimverify is not True:
+                return '550 DKIM failed email is rejected'
+            
+        def payload(part):
+            body = email.get_body(preferencelist=(part))
             if body:
                 return body.get_payload(decode=False)
             return None
@@ -70,25 +83,32 @@ class InboundChecker:
         for i in email.keys():
             jdict[i] = email.get(i)
         jdict['Spf'] = self.sfp
-        jdict['dkim_pass'] = dkimverify
-        jdict['Session_ip'] = session.peer[0]
-        jdict['From_RCPT'] = envelope.mail_from
-        jdict['To_RCPT'] = envelope.rcpt_tos[0]
-        jdict['bodyplain'] = payload('plain')
-        jdict['bodyhtml'] = payload('html')
+        jdict['Dkim-Pass'] = dkimverify
+        jdict['Session-IP'] = session.peer[0]
+        jdict['From-RCPT'] = envelope.mail_from
+        jdict['To-RCPT'] = envelope.rcpt_tos[0]
+        jdict['Bodyplain'] = payload('plain')
+        jdict['Bodyhtml'] = payload('html')
         jdict['Raw'] = envelope.content.decode('utf8', errors='replace')
 
         if webhook:
-            res = post(webhook,json=jdict)
+            if hmac_secret:
+                hmactime = str(time())
+                webhook_headers['HMAC-Time'] = hmactime
+                webhook_headers['HMAC-Signature'] = digest(f'{hmac_secret+hmactime}'.encode(),
+                                                        dumps(jdict).encode(),
+                                                        sha256).hex()
+
+            res = post(webhook,json=jdict,headers=webhook_headers)
             if log_off is None:
-                print(res,flush=True)
+                print(res.text,flush=True)
         else:
             print(dumps(jdict,indent=4),flush=True)
 
         return '250 Message accepted'
 
-
-controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
-controller.start()
-input('Server is running')
-controller.stop()
+if __name__ == '__main__':
+    controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
+    controller.start()
+    while True:
+        sleep(100)
