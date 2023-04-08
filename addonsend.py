@@ -16,4 +16,8 @@ class Send():
         self.hmactime = hmactime
         self.hmac_digest = hmac_digest
         self.webhook_headers = webhook_headers
+
+        self.response()
+
+    def response():
         return '250 Message accepted'

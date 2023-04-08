@@ -93,13 +93,13 @@ class InboundChecker:
         
         try: # Not the the most pythonic way but made for docker
             from addonparse import Parse
-            Parse(email,dkimverify,session,envelope,email_dict)
-            email = Parse.email
-            dkimverify = Parse.dkimverify
-            session = Parse.session
-            envelope = Parse.envelope
-            email_dict = Parse.email_dict
-        except: pass # No addon found
+            parsed = Parse(email,dkimverify,session,envelope,email_dict)
+            email = parsed.email
+            dkimverify = parsed.dkimverify
+            session = parsed.session
+            envelope = parsed.envelope
+            email_dict = parsed.email_dict
+        except: pass # No addon found using default parse
 
         if hmac_secret:
             hmactime = str(time())
@@ -107,10 +107,11 @@ class InboundChecker:
         
         try: # if you want to make your own sender, have to return response as SMTP server
             from addonsend import Send
-            return Send(email,dkimverify,session,envelope,email_dict,hmactime,hmac_digest,webhook_headers)
+            sender = Send(email,dkimverify,session,envelope,email_dict,hmactime,hmac_digest,webhook_headers)
+            return sender.response()
+        
+        except: #addonsender ignored
             
-        except:
-            #addon sender takes care of the rest including return
             if webhook:
                 if hmac_secret:
                     webhook_headers['HMAC-Time'] = hmactime
