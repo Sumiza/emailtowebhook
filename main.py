@@ -72,40 +72,56 @@ class InboundChecker:
         if dkim_reject:
             if dkimverify is not True:
                 return '550 DKIM failed email is rejected'
-            
+
         def payload(part):
             body = email.get_body(preferencelist=(part))
             if body:
                 return body.get_payload(decode=False)
             return None
         
-        jdict = {}
+        email_dict = {}
         for i in email.keys():
-            jdict[i] = email.get(i)
-        jdict['Spf'] = self.sfp
-        jdict['Dkim-Pass'] = dkimverify
-        jdict['Session-IP'] = session.peer[0]
-        jdict['From-RCPT'] = envelope.mail_from
-        jdict['To-RCPT'] = envelope.rcpt_tos[0]
-        jdict['Bodyplain'] = payload('plain')
-        jdict['Bodyhtml'] = payload('html')
-        jdict['Raw'] = envelope.content.decode('utf8', errors='replace')
+            email_dict[i] = email.get(i)
+        email_dict['Spf'] = self.sfp
+        email_dict['Dkim-Pass'] = dkimverify
+        email_dict['Session-IP'] = session.peer[0]
+        email_dict['From-RCPT'] = envelope.mail_from
+        email_dict['To-RCPT'] = envelope.rcpt_tos[0]
+        email_dict['Bodyplain'] = payload('plain')
+        email_dict['Bodyhtml'] = payload('html')
+        email_dict['Raw'] = envelope.content.decode('utf8', errors='replace')
+        
+        try: # Not the the most pythonic way but made for docker
+            from addonparse import Parse
+            Parse(email,dkimverify,session,envelope,email_dict)
+            email = Parse.email
+            dkimverify = Parse.dkimverify
+            session = Parse.session
+            envelope = Parse.envelope
+            email_dict = Parse.email_dict
+        except: pass # No addon found
 
-        if webhook:
-            if hmac_secret:
-                hmactime = str(time())
-                webhook_headers['HMAC-Time'] = hmactime
-                webhook_headers['HMAC-Signature'] = digest(f'{hmac_secret+hmactime}'.encode(),
-                                                        dumps(jdict).encode(),
-                                                        sha256).hex()
+        if hmac_secret:
+            hmactime = str(time())
+            hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
+        
+        try: # if you want to make your own sender, have to return response as SMTP server
+            from addonsend import Send
+            return Send(email,dkimverify,session,envelope,email_dict,hmactime,hmac_digest,webhook_headers)
+            
+        except:
+            #addon sender takes care of the rest including return
+            if webhook:
+                if hmac_secret:
+                    webhook_headers['HMAC-Time'] = hmactime
+                    webhook_headers['HMAC-Signature'] = hmac_digest
+                res = post(webhook,json=email_dict,headers=webhook_headers)
+                if log_off is None:
+                    print(res.text,flush=True)
+            else:
+                print(dumps(email_dict,indent=4),flush=True)
 
-            res = post(webhook,json=jdict,headers=webhook_headers)
-            if log_off is None:
-                print(res.text,flush=True)
-        else:
-            print(dumps(jdict,indent=4),flush=True)
-
-        return '250 Message accepted'
+            return '250 Message accepted'
 
 if __name__ == '__main__':
     controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
