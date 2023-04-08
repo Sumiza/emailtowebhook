@@ -93,8 +93,10 @@ class InboundChecker:
         
         try: # Not the the most pythonic way but made for docker
             from addonparse import Parse
+            
         except:
             pass # No addon found using default parse
+
         else:
             parsed = Parse(email,dkimverify,session,envelope,email_dict)
             email = parsed.email
