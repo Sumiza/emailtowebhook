@@ -99,7 +99,7 @@ class InboundChecker:
             session = parsed.session
             envelope = parsed.envelope
             email_dict = parsed.email_dict
-        except: pass # No addon found
+        except: pass # No addon found using default parse
 
         if hmac_secret:
             hmactime = str(time())
@@ -109,8 +109,9 @@ class InboundChecker:
             from addonsend import Send
             sender = Send(email,dkimverify,session,envelope,email_dict,hmactime,hmac_digest,webhook_headers)
             return sender.response()
-        except:
-            #addon sender takes care of the rest including return
+        
+        except: #addonsender ignored
+            
             if webhook:
                 if hmac_secret:
                     webhook_headers['HMAC-Time'] = hmactime
