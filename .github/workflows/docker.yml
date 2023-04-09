@@ -1,0 +1,47 @@
+name: Docker Build and Push Nightly
+
+on:
+  push:
+    branches: [ "master" ]
+
+  pull_request:
+    branches: [ "master" ]
+
+  schedule:
+    - cron:  '55 5 * * *'
+
+env:
+  DOCKER_USER: sumizadocker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: log into docker
+      run: |
+        docker logout
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u $DOCKER_USER --password-stdin
+
+    - name: build and tag daily
+      if: ${{ github.event_name == 'schedule' }}
+      run: >
+        docker build . 
+        -t $DOCKER_USER/${{ github.event.repository.name }}:latest 
+        -t $DOCKER_USER/${{ github.event.repository.name }}:$(date --rfc-3339=date)
+
+    - name: build and tag on push or pull
+      if: ${{ github.event_name != 'schedule' }}
+      run: >
+        docker build . 
+        -t $DOCKER_USER/${{ github.event.repository.name }}:latest
+        -t $DOCKER_USER/${{ github.event.repository.name }}:${{ github.head_ref || github.ref_name }} 
+        -t $DOCKER_USER/${{ github.event.repository.name }}:${{ github.sha }} 
+
+    - name: push build to docker hub
+      run: docker push $DOCKER_USER/${{ github.event.repository.name }} --all-tags
+
+    - name: log out of docker
+      run: docker logout
