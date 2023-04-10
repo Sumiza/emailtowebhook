@@ -98,13 +98,12 @@ class InboundChecker:
             pass # addonparse not found using default parser
 
         else:
-            parsed = Parse(email,dkimverify,session,envelope,email_dict,webhook_headers)
+            parsed = Parse(email,dkimverify,session,envelope,email_dict)
             email = parsed.email
             dkimverify = parsed.dkimverify
             session = parsed.session
             envelope = parsed.envelope
             email_dict = parsed.email_dict
-            webhook_headers = parsed.webhook_headers
 
         if hmac_secret:
             hmactime = str(time())
