@@ -1,17 +1,21 @@
-# Inbound Email Checker
-The Inbound Email Checker is a Python script that can be used to check incoming emails for various properties, such as SPF and DKIM verification, before accepting them. It can also send the email to a webhook, or print it to the console, depending on the configuration.
+# SMTP Server Parser
+The SMTP Server Parser is a python based smtp server that can be used to check incoming emails for various properties, such as SPF and DKIM verification, before accepting them. It can also send the email to a webhook, or print it to the console, depending on the configuration.
 
-## Prerequisites
-To use this script, you will need the following:
+There are advance options as well with addon scripts that can do custom parsing or sending.
 
-- Python 3.7 or higher
-- The spf package
-- The requests package
-- The aiosmtpd package
-- The dkim package
+https://github.com/Sumiza/smtp-parser
+
+
+## Docker Hub Tags
+To keep the dependencies up to date a new build is made daily and tagged as latest, if you want to lock into a specific build use the date or commit hash. Or use  the master tag to only update when there is a change to the code.
+
+- `latest` : Updated daily and when a new build is done
+- `master` : Updated when a new build is done
+- `date` : Daily build
+- `commit hash` : Github commit build
 
 ## Environment Variables
-The following environment variables should be set to configure the Inbound Checker:
+The following environment variables can  be set to configure the SMTP server:
 
 - `HOST`: The IP address or hostname to bind the SMTP server to. Defaults to `0.0.0.0`.
 - `PORT`: The port number to bind the SMTP server to. Defaults to `25`.
@@ -27,6 +31,23 @@ The following environment variables should be set to configure the Inbound Check
 - `HMAC_SECRET`: An optional string containing a secret key to use for HMAC validation of the webhook request. If set, the webhook request will include an HMAC signature for validation.
 
 ## Usage
-To use the Inbound Checker, simply run the Python script. The SMTP server will bind to the specified host and port and begin accepting incoming emails.
+To use the smtp server, simply run the Python script or docker container. The SMTP server will bind to the specified host and port and begin accepting incoming emails.
 
 Incoming emails will be checked for SPF and DKIM verification, and filtered according to the configuration specified in the environment variables. If an incoming email passes all checks, it will be sent to the webhook URL specified in the environment variables, or printed to the console, depending on the configuration.
+
+## Dependencies
+
+- Python 3.7 or higher
+- The spf package
+- The requests package
+- The aiosmtpd package
+- The dkim package
+
+## Advance Options
+Todo
+
+### Custom addon scripts
+Todo
+
+### Script Examples
+Todo

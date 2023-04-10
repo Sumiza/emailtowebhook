@@ -95,15 +95,16 @@ class InboundChecker:
             from addonparse import Parse
             
         except:
-            pass # No addon found using default parse
+            pass # addonparse not found using default parser
 
         else:
-            parsed = Parse(email,dkimverify,session,envelope,email_dict)
+            parsed = Parse(email,dkimverify,session,envelope,email_dict,webhook_headers)
             email = parsed.email
             dkimverify = parsed.dkimverify
             session = parsed.session
             envelope = parsed.envelope
             email_dict = parsed.email_dict
+            webhook_headers = parsed.webhook_headers
 
         if hmac_secret:
             hmactime = str(time())
@@ -112,7 +113,7 @@ class InboundChecker:
         try: # if you want to make your own sender, have to return response as SMTP server
             from addonsend import Send
         
-        except: #addonsender ignored
+        except: # addonsender not found using default sender
             
             if webhook:
                 if hmac_secret:
