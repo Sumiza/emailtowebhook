@@ -15,7 +15,7 @@ from hashlib import sha256
 from hmac import digest
 
 host = environ.get('HOST','0.0.0.0')
-port = environ.get('PORT',25)
+port = int(environ.get('PORT',25))
 
 target_email = environ.get('TARGET_EMAIL',None)
 source_email = environ.get('SOURCE_EMAIL',None)
@@ -24,11 +24,11 @@ spf_allow_list = environ.get('SPF_ALLOW_LIST',[])
 if spf_allow_list:
     spf_allow_list = loads(spf_allow_list)
 
-dkim_reject = environ.get('DKIM_REJECT',None)
+dkim_reject = bool(environ.get('DKIM_REJECT',None))
 
 ident = environ.get('IDENT','')
-email_size = environ.get('EMAIL_SIZE',5048576)
-log_off = environ.get('LOG_OFF',None)
+email_size = int(environ.get('EMAIL_SIZE',5048576))
+log_off = bool(environ.get('LOG_OFF',None))
 
 webhook = environ.get('WEBHOOK_URL',None)
 webhook_headers = environ.get('WEBHOOK_HEADERS',{})
