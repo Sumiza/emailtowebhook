@@ -1,0 +1,21 @@
+services:
+  smtp-parser:
+    
+    image: sumizadocker/smtp-parser:latest
+    
+    ports:
+      - "25:25"
+   
+    environment: # uncomment and change the ones you need
+      IDENT: My SMTP Server
+      # HOST: '0.0.0.0'
+      # PORT: '26'
+      # TARGET_EMAIL: .com
+      # SOURCE_EMAIL: .com
+      # SPF_ALLOW_LIST: '["pass", "permerror", "fail", "temperror", "softfail", "none", "neutral" ]'
+      # DKIM_REJECT: 'True'
+      # EMAIL_SIZE: '5048576'
+      # LOG_OFF: 'True'
+      # WEBHOOK_URL: https://webhookbin.net/v1/bin/f3760399-4f37-476e-8536-b513f492d6ae
+      # WEBHOOK_HEADERS: '{"Test-Header":"Hi There","Test-Header2":"4"}'
+      # HMAC_SECRET: SuperSecret
