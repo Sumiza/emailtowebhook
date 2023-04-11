@@ -5,3 +5,14 @@ class Parse():
         self.session = session
         self.envelope = envelope
         self.email_dict = email_dict
+
+    ### Write your custom parser here
+    # default sender will use self.email_dict
+
+
+
+
+
+
+
+    ###

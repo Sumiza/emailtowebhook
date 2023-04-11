@@ -9,10 +9,15 @@ def hmac_compare(secret:str,signature:str,time:str,content:dict):
                 sha256).hex()
     return compare_digest(ans,signature)
 
-webhook = loads()
 
-is_same = hmac_compare(
-    'Secret',
-    webhook['headers']['Hmac-Signature'],
-    webhook['headers']['Hmac-Time'],
-    webhook['content'])
+if __name__ == '__main__':
+    
+    webhook = loads() # load the full webhook that was sent
+
+    is_same = hmac_compare(
+        'Secret',
+        webhook['headers']['Hmac-Signature'],
+        webhook['headers']['Hmac-Time'],
+        webhook['content'])
+    
+    print(is_same)

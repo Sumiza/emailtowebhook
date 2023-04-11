@@ -17,5 +17,12 @@ class Send():
         self.hmac_digest = hmac_digest
         self.webhook_headers = webhook_headers
 
+    # write your custom sender here
+    ###
+
+    
+
+
+    ####
     def response(self):
         return '250 Message accepted'
