@@ -1,0 +1,36 @@
+name: Docker Build and Push Beta
+
+on:
+  push:
+    branches: [ "beta" ]
+
+  pull_request:
+    branches: [ "beta" ]
+
+env:
+  DOCKER_USER: sumizadocker
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: beta
+
+    - name: log into docker
+      run: |
+        docker logout
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u $DOCKER_USER --password-stdin
+
+    - name: build and tag beta
+      run: >
+        docker build . 
+        -t $DOCKER_USER/${{ github.event.repository.name }}:beta
+
+    - name: push build to docker hub
+      run: docker push $DOCKER_USER/${{ github.event.repository.name }} --all-tags
+
+    - name: log out of docker
+      run: docker logout
