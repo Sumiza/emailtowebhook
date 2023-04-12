@@ -4,7 +4,7 @@ services:
     image: sumizadocker/smtp-parser:latest
     
     ports:
-      - "25:25"  
+      - "25:25"
     
     environment: # uncomment and change the ones you need
       IDENT: My Test SMTP Server
@@ -19,6 +19,7 @@ services:
       # WEBHOOK_URL: https://webhookbin.net/v1/bin/4142fd66-fca8-4c36-bc04-cfa17c092a0d
       # WEBHOOK_HEADERS: '{"Test-Header":"Hi There","Test-Header2":"4"}'
       # HMAC_SECRET: SuperSecret
+      # PIP_INSTALL: 'urlrequest webhookbin'
 
     # volumes: # if need the addons
     #   - ~/addonsend.py:/addonsend.py
