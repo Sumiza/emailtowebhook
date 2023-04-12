@@ -8,4 +8,5 @@ EXPOSE 25
 
 COPY main.py main.py
 
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD [ "python3","main.py" ]
