@@ -4,10 +4,10 @@ services:
     image: sumizadocker/smtp-parser:latest
     
     ports:
-      - "25:25"
-   
+      - "25:25"  
+    
     environment: # uncomment and change the ones you need
-      IDENT: My SMTP Server
+      IDENT: My Test SMTP Server
       # HOST: '0.0.0.0'
       # PORT: 25
       # TARGET_EMAIL: .com
@@ -16,6 +16,16 @@ services:
       # DKIM_REJECT: True
       # EMAIL_SIZE: 5048576
       # LOG_OFF: True
-      # WEBHOOK_URL: https://webhookbin.net/v1/bin/f3760399-4f37-476e-8536-b513f492d6ae
+      # WEBHOOK_URL: https://webhookbin.net/v1/bin/4142fd66-fca8-4c36-bc04-cfa17c092a0d
       # WEBHOOK_HEADERS: '{"Test-Header":"Hi There","Test-Header2":"4"}'
       # HMAC_SECRET: SuperSecret
+
+    # volumes: # if need the addons
+    #   - ~/addonsend.py:/addonsend.py
+    #   - ~/addonparse.py:/addonparse.py
+
+    # deploy:
+    #   restart_policy:
+    #     condition: any
+    #     delay: 5s
+    #     window: 120s
