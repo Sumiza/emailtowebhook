@@ -29,6 +29,7 @@ The following environment variables can  be set to configure the SMTP server:
 - `WEBHOOK_URL`: An optional string containing the URL of a webhook to send incoming emails to. If set, the SMTP server will send incoming emails to this webhook.
 - `WEBHOOK_HEADERS`: An optional JSON-formatted string containing a dictionary of headers to include in the webhook request. If set, the headers in this dictionary will be added to the webhook request.
 - `HMAC_SECRET`: An optional string containing a secret key to use for HMAC validation of the webhook request. If set, the webhook request will include an HMAC signature for validation.
+- `PIP_INSTALL`: An optional string containing any projects you need to download with pip for addon scripts `'webhookbin urlrequest secondstotext'`
 
 ## Usage
 To use the smtp server, simply run the Python script or docker container. The SMTP server will bind to the specified host and port and begin accepting incoming emails.
