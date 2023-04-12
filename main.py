@@ -48,13 +48,13 @@ class InboundChecker:
             if not envelope.mail_from.endswith(source_email):
                 return '550 Not accepting emails from your email'
         
-        self.spf = check2(i=session.peer[0],
+        self.spf_answer = check2(i=session.peer[0],
                         s=envelope.mail_from,
                         h=session.host_name,verbose=False)
         
         if spf_allow_list:
-            if self.spf[0] not in spf_allow_list:
-                return f'550 Refused because SPF record is {self.spf}'
+            if self.spf_answer[0] not in spf_allow_list:
+                return f'550 Refused because SPF record is {self.spf_answer}'
             
         envelope.rcpt_tos.append(address)
 
@@ -82,7 +82,7 @@ class InboundChecker:
         email_dict = {}
         for i in email.keys():
             email_dict[i] = email.get(i)
-        email_dict['Spf'] = self.spf
+        email_dict['Spf'] = self.spf_answer
         email_dict['Dkim-Pass'] = dkimverify
         email_dict['Session-IP'] = session.peer[0]
         email_dict['From-RCPT'] = envelope.mail_from
