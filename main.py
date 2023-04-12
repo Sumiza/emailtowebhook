@@ -24,11 +24,11 @@ spf_allow_list = environ.get('SPF_ALLOW_LIST',[])
 if spf_allow_list:
     spf_allow_list = loads(spf_allow_list)
 
-dkim_reject = bool(environ.get('DKIM_REJECT',None))
+dkim_reject = bool(environ.get('DKIM_REJECT',False))
 
 ident = environ.get('IDENT','')
 email_size = int(environ.get('EMAIL_SIZE',5048576))
-log_off = bool(environ.get('LOG_OFF',None))
+log_off = bool(environ.get('LOG_OFF',False))
 
 webhook = environ.get('WEBHOOK_URL',None)
 webhook_headers = environ.get('WEBHOOK_HEADERS',{})
@@ -58,7 +58,7 @@ class InboundChecker:
             
         envelope.rcpt_tos.append(address)
 
-        if log_off is None:
+        if log_off is False:
             print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
         
         return '250 OK' 
@@ -70,7 +70,7 @@ class InboundChecker:
         dkimverify = verify(envelope.content)
         
         if dkim_reject:
-            if dkimverify is not True:
+            if dkimverify is False:
                 return '550 DKIM failed email is rejected'
 
         def payload(part):
@@ -119,7 +119,7 @@ class InboundChecker:
                     webhook_headers['HMAC-Time'] = hmactime
                     webhook_headers['HMAC-Signature'] = hmac_digest
                 res = post(webhook,json=email_dict,headers=webhook_headers)
-                if log_off is None:
+                if log_off is False:
                     print(res.text,flush=True)
             else:
                 print(dumps(email_dict,indent=4),flush=True)
