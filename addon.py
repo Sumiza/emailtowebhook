@@ -27,7 +27,7 @@ class Addon():
         """
         pass
 
-        # self.sender() to call the custom sender
+        # self.sender() #to call the custom sender
 
 
     def sender(self):
