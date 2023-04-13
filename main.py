@@ -64,6 +64,9 @@ class InboundChecker:
         return '250 OK' 
 
     async def handle_DATA(self, server: SMTPServer, session: SMTPSession, envelope: SMTPEnvelope):
+        
+        global webhook_headers # Dirty fix but is needed in case there is no addon
+        global webhook
 
         email:MIMEPart = Parser(policy=default).parsestr(envelope.content.decode('utf8', errors='replace'))
 
@@ -90,45 +93,36 @@ class InboundChecker:
         email_dict['Bodyplain'] = payload('plain')
         email_dict['Bodyhtml'] = payload('html')
         email_dict['Raw'] = envelope.content.decode('utf8', errors='replace')
-        
-        try: # Not the the most pythonic way but made for docker
-            from addonparse import Parse
-            
-        except:
-            pass # addonparse not found using default parser
 
+        try:
+            from addon import Addon
+        except: pass # no addon found
         else:
-            parsed = Parse(email,dkimverify,session,envelope,email_dict)
-            email = parsed.email
-            dkimverify = parsed.dkimverify
-            session = parsed.session
-            envelope = parsed.envelope
+            parsed = Addon(email,session,envelope,email_dict,webhook,webhook_headers)
+            
             email_dict = parsed.email_dict
+            webhook_headers = parsed.webhook_headers
+            webhook = parsed.webhook
 
-        if hmac_secret:
-            hmactime = str(time())
-            hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
-        
-        try: # if you want to make your own sender, have to return response as SMTP server
-            from addonsend import Send
-        
-        except: # addonsender not found using default sender
-            
-            if webhook:
-                if hmac_secret:
-                    webhook_headers['HMAC-Time'] = hmactime
-                    webhook_headers['HMAC-Signature'] = hmac_digest
-                res = post(webhook,json=email_dict,headers=webhook_headers)
-                if log_off is False:
-                    print(res.text,flush=True)
-            else:
-                print(dumps(email_dict,indent=4),flush=True)
+            if parsed.addon_send_response is not None:
+                return parsed.addon_send_response
 
-            return '250 Message accepted'
-        
+        if webhook:
+
+            if hmac_secret:
+                hmactime = str(time())
+                hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
+                webhook_headers['HMAC-Time'] = hmactime
+                webhook_headers['HMAC-Signature'] = hmac_digest
+
+            res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
+
+            if log_off is False:
+                print(res.text,flush=True)
         else:
-            sender = Send(email,dkimverify,session,envelope,email_dict,hmactime,hmac_digest,webhook_headers)
-            return sender.response()
+            print(dumps(email_dict,indent=4),flush=True)
+
+        return '250 Message accepted'
 
 if __name__ == '__main__':
     controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
