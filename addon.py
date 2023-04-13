@@ -1,6 +1,3 @@
-
-
-
 class Addon():
     def __init__(self,
                 email,
@@ -35,10 +32,10 @@ class Addon():
 
     def sender(self):
         """
-            if this called then you need to care of sending by yourself
+            if this called then you need to take care of sending by yourself
             this can be to a database, webhook, email.. etc
             self.addon_send_response has to be a smtp response if it stays None
-            the default sender will be called.
+            the default sender will be called after this function.
         """
         self.addon_send_response = '250 Message accepted' # smpt return
 
