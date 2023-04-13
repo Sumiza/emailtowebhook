@@ -21,9 +21,8 @@ services:
       # HMAC_SECRET: SuperSecret
       # PIP_INSTALL: 'urlrequest webhookbin'
 
-    # volumes: # if need the addons
-    #   - ~/addonsend.py:/addonsend.py
-    #   - ~/addonparse.py:/addonparse.py
+    # volumes: # if need the addon
+    #   - ~/addon.py:/addon.py
 
     # deploy:
     #   restart_policy:
