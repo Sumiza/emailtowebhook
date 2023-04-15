@@ -7,7 +7,7 @@ services:
       - "25:25"
     
     environment: # uncomment and change the ones you need
-      IDENT: My Test SMTP Server
+      IDENT: Email To Discord
       # HOST: '0.0.0.0'
       # PORT: 25
       # TARGET_EMAIL: .com
@@ -20,9 +20,10 @@ services:
       # WEBHOOK_HEADERS: '{"Test-Header":"Hi There","Test-Header2":"4"}'
       # HMAC_SECRET: SuperSecret
       # PIP_INSTALL: 'urlrequest webhookbin'
+      DISCORD_IDTOKEN: '109691893456346445176/Avuqw05Tmoz9pw8-Efeawf4332c-ooZR3_dy5voHRFgaregGDAgrergL8v5wphMQcMWlVD'
 
-    # volumes: # if need the addon
-    #   - ~/addon.py:/addon.py
+    volumes: # if need the addon
+      - ~/addon.py:/addon.py
 
     # deploy:
     #   restart_policy:
