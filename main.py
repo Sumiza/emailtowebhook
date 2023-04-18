@@ -17,7 +17,7 @@ from hmac import digest
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
 
-def genlist(envstring:str):
+def genlist(envstring:str) -> list:
     if envstring:
         envstring = envstring.replace(" ","").split(',')
     return envstring
@@ -42,14 +42,20 @@ hmac_secret = environ.get('HMAC_SECRET',None)
 
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
+        
+        def endslist(testends:str, testlist:list) -> bool:
+            for i in testlist:
+                if testends.endswith(i):
+                    return True
+            return False
 
         if target_email:
-            if not address.endswith(target_email):
+            if not endslist(address,target_email):
                 return '556 Not accepting for that domain'
         
         if source_email:
-            if not envelope.mail_from.endswith(source_email):
-                return '550 Not accepting emails from your email'
+            if not endslist(envelope.mail_from,source_email):
+                return '550 Not accepting emails from your email'                
         
         self.spf_answer = check2(i=session.peer[0],
                         s=envelope.mail_from,
