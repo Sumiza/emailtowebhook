@@ -12,7 +12,7 @@ services:
       # PORT: 25
       # TARGET_EMAIL: .com
       # SOURCE_EMAIL: .com
-      # SPF_ALLOW_LIST: '["pass", "permerror", "fail", "temperror", "softfail", "none", "neutral" ]'
+      # SPF_ALLOW_LIST: 'pass, permerror, fail, temperror, softfail, none, neutral'
       # DKIM_REJECT: True
       # EMAIL_SIZE: 5048576
       # LOG_OFF: True
