@@ -17,12 +17,15 @@ from hmac import digest
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
 
-target_email = environ.get('TARGET_EMAIL',None)
-source_email = environ.get('SOURCE_EMAIL',None)
+def genlist(envstring:str):
+    if envstring:
+        envstring = envstring.replace(" ","").split(',')
+    return envstring
 
-spf_allow_list = environ.get('SPF_ALLOW_LIST',[])
-if spf_allow_list:
-    spf_allow_list = loads(spf_allow_list)
+target_email = genlist(environ.get('TARGET_EMAIL',None))
+source_email = genlist(environ.get('SOURCE_EMAIL',None))
+
+spf_allow_list = genlist(environ.get('SPF_ALLOW_LIST',None))
 
 dkim_reject = bool(environ.get('DKIM_REJECT',False))
 
