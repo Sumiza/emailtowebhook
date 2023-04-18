@@ -13,9 +13,10 @@ from dkim import verify
 from time import sleep, time
 from hashlib import sha256
 from hmac import digest
-from logging import Logger,DEBUG,INFO,NOTSET,WARNING,ERROR
+import logging
 
-Logger.setLevel(environ.get('LOGGER',INFO))
+
+logging.basicConfig(level=environ.get('LOGGER',logging.INFO))
 
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
@@ -72,8 +73,8 @@ class InboundChecker:
         envelope.rcpt_tos.append(address)
 
         if log_off is False:
-            Logger.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
-            print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
+            logging.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
+            # print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
         
         return '250 OK' 
 
@@ -132,11 +133,11 @@ class InboundChecker:
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
 
             if log_off is False:
-                Logger.info(res.text)
-                print(res.text,flush=True)
+                logging.debug(res.text)
+                # print(res.text,flush=True)
         else:
-            Logger.info(dumps(email_dict,indent=4))
-            print(dumps(email_dict,indent=4),flush=True)
+            logging.debug(dumps(email_dict,indent=4))
+            # print(dumps(email_dict,indent=4),flush=True)
 
         return '250 Message accepted'
 
