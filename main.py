@@ -13,6 +13,9 @@ from dkim import verify
 from time import sleep, time
 from hashlib import sha256
 from hmac import digest
+from logging import Logger,DEBUG,INFO,NOTSET,WARNING,ERROR
+
+Logger.setLevel(environ.get('LOGGER',INFO))
 
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
@@ -39,6 +42,7 @@ if webhook_headers:
     webhook_headers = loads(webhook_headers)
 
 hmac_secret = environ.get('HMAC_SECRET',None)
+
 
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
@@ -68,6 +72,7 @@ class InboundChecker:
         envelope.rcpt_tos.append(address)
 
         if log_off is False:
+            Logger.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
             print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
         
         return '250 OK' 
@@ -127,8 +132,10 @@ class InboundChecker:
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
 
             if log_off is False:
+                Logger.info(res.text)
                 print(res.text,flush=True)
         else:
+            Logger.info(dumps(email_dict,indent=4))
             print(dumps(email_dict,indent=4),flush=True)
 
         return '250 Message accepted'
