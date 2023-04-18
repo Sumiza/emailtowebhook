@@ -22,9 +22,9 @@ The following environment variables can  be set to configure the SMTP server:
 
 - `HOST`: The IP address or hostname to bind the SMTP server to. Defaults to `0.0.0.0`.
 - `PORT`: The port number to bind the SMTP server to. Defaults to `25`.
-- `TARGET_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are addressed to this email address. It uses .endswith which means you can put `.com`, `@example.com` or `example@example.com` 
-- `SOURCE_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are sent from this email address. It uses .endswith which means you can put `.com`, `@example.com` or `example@example.com` 
-- `SPF_ALLOW_LIST`: An optional JSON-formatted string containing a list of allowed SPF responses `['pass', 'permerror', 'fail', 'temperror', 'softfail', 'none', 'neutral' ]`.
+- `TARGET_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are addressed to these email addresses. It uses .endswith and accepts a list seperated by `","` `'.com, @example.com, example@example.com'` or a single email `'example@example.com'`
+- `SOURCE_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are sent from this email address. It uses .endswith and accepts a list seperated by `","` `'.com, @example.com, example@example.com'` or a single email `'example@example.com'`
+- `SPF_ALLOW_LIST`: An optional string containing a list of allowed SPF responses `'pass, permerror, fail, temperror, softfail, none, neutral'`.
 - `DKIM_REJECT`: An optional boolean value indicating whether to reject emails that fail DKIM verification. If set to anything, any email that fails DKIM verification will be rejected. If not set, emails will not be rejected based on DKIM verification.
 - `IDENT`: An optional string that will be used as the identity string for the SMTP server. Defaults to an empty string.
 - `EMAIL_SIZE`: An optional integer value indicating the maximum size of an incoming email, in bytes. Defaults to `5048576`.
