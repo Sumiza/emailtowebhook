@@ -16,7 +16,7 @@ from hmac import digest
 import logging
 
 
-logging.basicConfig(level=environ.get('LOGGER',logging.INFO))
+logging.basicConfig(level=environ.get('LOGGER'.upper(),logging.INFO))
 
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
@@ -35,7 +35,7 @@ dkim_reject = bool(environ.get('DKIM_REJECT',False))
 
 ident = environ.get('IDENT','')
 email_size = int(environ.get('EMAIL_SIZE',5048576))
-log_off = bool(environ.get('LOG_OFF',False))
+# log_off = bool(environ.get('LOG_OFF',False))
 
 webhook = environ.get('WEBHOOK_URL',None)
 webhook_headers = environ.get('WEBHOOK_HEADERS',{})
@@ -136,7 +136,7 @@ class InboundChecker:
                 logging.debug(res.text)
                 # print(res.text,flush=True)
         else:
-            logging.debug(dumps(email_dict,indent=4))
+            logging.info(dumps(email_dict,indent=4))
             # print(dumps(email_dict,indent=4),flush=True)
 
         return '250 Message accepted'

@@ -6,29 +6,10 @@ services:
     ports:
       - "25:25"
     
-    environment: # uncomment and change the ones you need
-      IDENT: Email to SMS Telnyx
-      # HOST: '0.0.0.0'
-      # PORT: 25
-      # TARGET_EMAIL: .com
-      # SOURCE_EMAIL: .com
-      # SPF_ALLOW_LIST: 'pass, permerror, fail, temperror, softfail, none, neutral'
-      # DKIM_REJECT: True
-      # EMAIL_SIZE: 5048576
-      # LOG_OFF: True
-      # WEBHOOK_URL: https://webhookbin.net/v1/bin/4142fd66-fca8-4c36-bc04-cfa17c092a0d
-      # WEBHOOK_HEADERS: '{"Test-Header":"Hi There","Test-Header2":"4"}'
-      # HMAC_SECRET: SuperSecret
-      # PIP_INSTALL: 'urlrequest webhookbin'
+    environment:
       TELNYX_KEY: 'KEY4354325243redsgaaegerG_GAefgewafEAWFAGE'
       TELNYX_FROM: '+11231231234'
       TELNYX_TO: '+11231231234'
 
-    volumes: # if need the addon
+    volumes:
       - ~/addon.py:/addon.py
-
-    # deploy:
-    #   restart_policy:
-    #     condition: any
-    #     delay: 5s
-    #     window: 120s
