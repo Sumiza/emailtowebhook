@@ -17,6 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
+print(environ.get('LOGGER',logging.INFO).upper(),flush=True)
 logger.setLevel(environ.get('LOGGER',logging.INFO).upper())
 
 # logging.basicConfig(level=environ.get('LOGGER'.upper(),logging.INFO))
