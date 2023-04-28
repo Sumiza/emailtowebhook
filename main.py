@@ -15,8 +15,11 @@ from hashlib import sha256
 from hmac import digest
 import logging
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(environ.get('LOGGER'.upper(),logging.INFO))
 
-logging.basicConfig(level=environ.get('LOGGER'.upper(),logging.INFO))
+# logging.basicConfig(level=environ.get('LOGGER'.upper(),logging.INFO))
 
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
@@ -56,10 +59,12 @@ class InboundChecker:
 
         if target_email:
             if not endslist(address,target_email):
+                logger.debug(f'556 Not accepting for that domain: {address} : {envelope.mail_from}')
                 return '556 Not accepting for that domain'
         
         if source_email:
             if not endslist(envelope.mail_from,source_email):
+                logger.debug(f'550 Not accepting emails from your email: {envelope.mail_from} : {address}')
                 return '550 Not accepting emails from your email'                
         
         self.spf_answer = check2(i=session.peer[0],
@@ -68,12 +73,13 @@ class InboundChecker:
         
         if spf_allow_list:
             if self.spf_answer[0] not in spf_allow_list:
+                logger.debug(f'550 Refused because SPF record is {self.spf_answer} : {envelope.mail_from} : {address}')
                 return f'550 Refused because SPF record is {self.spf_answer}'
             
         envelope.rcpt_tos.append(address)
 
-        if log_off is False:
-            logging.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
+        # if log_off is False:
+        logging.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
             # print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
         
         return '250 OK' 
@@ -89,6 +95,7 @@ class InboundChecker:
         
         if dkim_reject:
             if dkimverify is False:
+                logger.debug(f'550 DKIM failed email is rejected : {dkimverify} : {envelope.mail_from} : {envelope.rcpt_tos[0]} ')
                 return '550 DKIM failed email is rejected'
 
         def payload(part):
@@ -111,7 +118,7 @@ class InboundChecker:
 
         try:
             from addon import Addon
-        except: pass # no addon found
+        except: logger.debug("No Addon found") # no addon found
         else:
             parsed = Addon(email,session,envelope,email_dict,webhook,webhook_headers)
             
@@ -131,10 +138,8 @@ class InboundChecker:
                 webhook_headers['HMAC-Signature'] = hmac_digest
 
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
+            logging.info(res.text)
 
-            if log_off is False:
-                logging.debug(res.text)
-                # print(res.text,flush=True)
         else:
             logging.info(dumps(email_dict,indent=4))
             # print(dumps(email_dict,indent=4),flush=True)
