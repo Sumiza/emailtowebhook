@@ -13,14 +13,15 @@ from dkim import verify
 from time import sleep, time
 from hashlib import sha256
 from hmac import digest
-import logging
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-print(environ.get('LOGGER',logging.INFO).upper(),flush=True)
-logger.setLevel(environ.get('LOGGER',logging.INFO).upper())
 
-# logging.basicConfig(level=environ.get('LOGGER'.upper(),logging.INFO))
+loggerlevel = environ.get('LOGGER'.upper(),'INFO')
+if loggerlevel == 'INFO':
+    loggerlevel = 20
+elif loggerlevel == 'DEBUG':
+    loggerlevel = 10
+else:
+    raise ValueError(f'LOGGER can only be INFO or DEBUG was {loggerlevel}')
 
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
@@ -48,6 +49,13 @@ if webhook_headers:
 
 hmac_secret = environ.get('HMAC_SECRET',None)
 
+class logger():
+    # todo log to file
+    def shownow(self,data,level):
+        if level <= loggerlevel:
+            print(data,flush=True)
+    def debug(self,log): self.shownow(log,10)
+    def info(self,log): self.shownow(log,20)
 
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
@@ -80,7 +88,7 @@ class InboundChecker:
         envelope.rcpt_tos.append(address)
 
         # if log_off is False:
-        logging.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
+        logger.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')
             # print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
         
         return '250 OK' 
@@ -139,10 +147,10 @@ class InboundChecker:
                 webhook_headers['HMAC-Signature'] = hmac_digest
 
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
-            logging.info(res.text)
+            logger.info(res.text)
 
         else:
-            logging.info(dumps(email_dict,indent=4))
+            logger.info(dumps(email_dict,indent=4))
             # print(dumps(email_dict,indent=4),flush=True)
 
         return '250 Message accepted'
