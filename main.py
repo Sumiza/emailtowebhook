@@ -136,7 +136,6 @@ class InboundChecker:
                 return parsed.addon_send_response
 
         if webhook:
-
             if hmac_secret:
                 hmactime = str(time())
                 hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
