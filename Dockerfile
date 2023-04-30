@@ -6,6 +6,8 @@ RUN pip install dnspython aiosmtpd pyspf dkimpy requests
 
 EXPOSE 25
 
+ENV PYTHONUNBUFFERED=TRUE
+
 COPY main.py main.py
 COPY docker-entrypoint.sh docker-entrypoint.sh
 

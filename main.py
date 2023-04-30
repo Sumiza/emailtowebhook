@@ -14,21 +14,33 @@ from time import sleep, time
 from hashlib import sha256
 from hmac import digest
 
+loggerlevel = environ.get('LOGGER','INFO').upper()
+if loggerlevel == 'INFO':
+    loggerlevel = 20
+elif loggerlevel == 'DEBUG':
+    loggerlevel = 10
+elif loggerlevel == 'OFF':
+    loggerlevel = 9999
+else:
+    raise ValueError(f'LOGGER can only be INFO, DEBUG or OFF was {loggerlevel}')
+
 host = environ.get('HOST','0.0.0.0')
 port = int(environ.get('PORT',25))
 
-target_email = environ.get('TARGET_EMAIL',None)
-source_email = environ.get('SOURCE_EMAIL',None)
+def genlist(envstring:str) -> list:
+    if envstring:
+        envstring = envstring.replace(" ","").split(',')
+    return envstring
 
-spf_allow_list = environ.get('SPF_ALLOW_LIST',[])
-if spf_allow_list:
-    spf_allow_list = loads(spf_allow_list)
+target_email = genlist(environ.get('TARGET_EMAIL',None))
+source_email = genlist(environ.get('SOURCE_EMAIL',None))
+
+spf_allow_list = genlist(environ.get('SPF_ALLOW_LIST',None))
 
 dkim_reject = bool(environ.get('DKIM_REJECT',False))
 
 ident = environ.get('IDENT','')
 email_size = int(environ.get('EMAIL_SIZE',5048576))
-log_off = bool(environ.get('LOG_OFF',False))
 
 webhook = environ.get('WEBHOOK_URL',None)
 webhook_headers = environ.get('WEBHOOK_HEADERS',{})
@@ -37,16 +49,32 @@ if webhook_headers:
 
 hmac_secret = environ.get('HMAC_SECRET',None)
 
+def sendmessage(message,level):
+    if level >= loggerlevel:
+        print(message,flush=True)
+
+class Logger: # TODO add write to file, keep format the same as logging
+    def info(message): sendmessage(message,20)
+    def debug(message): sendmessage(message,10)
+
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
+        
+        def endslist(testends:str, testlist:list) -> bool:
+            for i in testlist:
+                if testends.endswith(i):
+                    return True
+            return False
 
         if target_email:
-            if not address.endswith(target_email):
+            if not endslist(address,target_email):
+                Logger.debug(f'556 Not accepting for that domain: {address} : {envelope.mail_from}')
                 return '556 Not accepting for that domain'
         
         if source_email:
-            if not envelope.mail_from.endswith(source_email):
-                return '550 Not accepting emails from your email'
+            if not endslist(envelope.mail_from,source_email):
+                Logger.debug(f'550 Not accepting emails from your email: {envelope.mail_from} : {address}')
+                return '550 Not accepting emails from your email'                
         
         self.spf_answer = check2(i=session.peer[0],
                         s=envelope.mail_from,
@@ -54,13 +82,12 @@ class InboundChecker:
         
         if spf_allow_list:
             if self.spf_answer[0] not in spf_allow_list:
+                Logger.debug(f'550 Refused because SPF record is {self.spf_answer} : {envelope.mail_from} : {address}')
                 return f'550 Refused because SPF record is {self.spf_answer}'
             
         envelope.rcpt_tos.append(address)
 
-        if log_off is False:
-            print(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}',flush=True)
-        
+        Logger.info(f'Accepted connection from {session.peer[0]}, for {address}, from {envelope.mail_from}')        
         return '250 OK' 
 
     async def handle_DATA(self, server: SMTPServer, session: SMTPSession, envelope: SMTPEnvelope):
@@ -74,6 +101,7 @@ class InboundChecker:
         
         if dkim_reject:
             if dkimverify is False:
+                Logger.debug(f'550 DKIM failed email is rejected : {dkimverify} : {envelope.mail_from} : {envelope.rcpt_tos[0]}')
                 return '550 DKIM failed email is rejected'
 
         def payload(part):
@@ -96,7 +124,7 @@ class InboundChecker:
 
         try:
             from addon import Addon
-        except: pass # no addon found
+        except: Logger.debug("No Addon found") # no addon found
         else:
             parsed = Addon(email,session,envelope,email_dict,webhook,webhook_headers)
             
@@ -108,7 +136,6 @@ class InboundChecker:
                 return parsed.addon_send_response
 
         if webhook:
-
             if hmac_secret:
                 hmactime = str(time())
                 hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
@@ -116,11 +143,10 @@ class InboundChecker:
                 webhook_headers['HMAC-Signature'] = hmac_digest
 
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
+            Logger.info(res.text,20)
 
-            if log_off is False:
-                print(res.text,flush=True)
         else:
-            print(dumps(email_dict,indent=4),flush=True)
+            Logger.info(dumps(email_dict,indent=4))
 
         return '250 Message accepted'
 
