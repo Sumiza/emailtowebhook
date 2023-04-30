@@ -14,7 +14,7 @@ from time import sleep, time
 from hashlib import sha256
 from hmac import digest
 
-loggerlevel = environ.get('LOGGER'.upper(),'INFO')
+loggerlevel = environ.get('LOGGER','INFO').upper()
 if loggerlevel == 'INFO':
     loggerlevel = 20
 elif loggerlevel == 'DEBUG':
