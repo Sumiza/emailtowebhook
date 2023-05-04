@@ -4,7 +4,11 @@
     TELNYX_FROM = '+11231231234'
 
     Environment Variables Optional:
+    SUBJECT_BLACKLIST = 'Invoice, Spam, meeting'  
     TELNYX_TO = '+11231231234'
+    DOMAIN_NUMBERS =  '{
+        "example.com":"+11231231234",
+        "sub.example.com":"+19991112222"}'
 
     If an environment variable is not set for TELNYX_TO
     it will try and pull the number from the first part
@@ -14,6 +18,8 @@
 """
 
 from os import environ
+from json import loads
+from main import genlist
 
 class Addon():
     def __init__(self,
@@ -35,6 +41,14 @@ class Addon():
         self.parse()
 
     def parse(self):
+
+        # Blackhole if subject had any word from SUBJECT_BLACKLIST
+        subject_blacklist = genlist(environ.get('SUBJECT_BLACKLIST',None))
+        if subject_blacklist:
+            for block in subject_blacklist:
+                if self.email_dict['Subject'].casefold().find(block.casefold()) != -1:
+                    self.addon_send_response = '250 Message accepted to blackhole'
+                    return
 
         message:str = self.email_dict.get('Bodyplain').strip()
 
@@ -60,6 +74,8 @@ class Addon():
                     output = output[:deleteme]
 
             return '\n'.join(output).strip()
+        
+        # Message to send  as text
         message = removereply(message)
 
         # raise an error if message is longer than 3 sms texts
@@ -80,16 +96,28 @@ class Addon():
                 return '+'+output
             return output
 
+        # figure out where to send text message to
         tonumber = environ.get('TELNYX_TO',None)
 
         if tonumber is None: 
             tonumber = self.email_dict['To-RCPT'].split('@')[0]
             tonumber = phoneformat(tonumber)
+
+        # Figure out what to use as from number
+        domain_numbers = environ.get('DOMAIN_NUMBERS',{})
+
+        if domain_numbers:
+            domain_numbers:dict = loads(domain_numbers)
+
+        fromnumber  = domain_numbers.get(
+            self.email_dict['To-RCPT'].casefold().split('@')[1],environ.get('TELNYX_FROM'))
         
+        # clear email dict
         self.email_dict = {}
 
+        # Build dict that will become json to send to telnyx
         self.email_dict['to'] = tonumber
-        self.email_dict['from'] = environ.get('TELNYX_FROM')
+        self.email_dict['from'] = fromnumber
         self.email_dict['text'] = message
 
         self.webhook_headers['Authorization'] = 'Bearer '+ environ.get('TELNYX_KEY')
