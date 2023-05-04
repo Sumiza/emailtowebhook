@@ -6,7 +6,7 @@
     Environment Variables Optional:
     SUBJECT_BLACKLIST = 'Invoice, Spam, meeting'  
     TELNYX_TO = '+11231231234'
-    DOMAIN_NUMBERS =  '{
+    DOMAIN_SENDERS =  '{
         "example.com":"+11231231234",
         "sub.example.com":"+19991112222"}'
 
@@ -104,12 +104,12 @@ class Addon():
             tonumber = phoneformat(tonumber)
 
         # Figure out what to use as from number
-        domain_numbers = environ.get('DOMAIN_NUMBERS',{})
+        domain_senders = environ.get('DOMAIN_SENDERS',{})
 
-        if domain_numbers:
-            domain_numbers:dict = loads(domain_numbers)
+        if domain_senders:
+            domain_senders:dict = loads(domain_senders)
 
-        fromnumber  = domain_numbers.get(
+        fromnumber  = domain_senders.get(
             self.email_dict['To-RCPT'].casefold().split('@')[1],environ.get('TELNYX_FROM'))
         
         # clear email dict
