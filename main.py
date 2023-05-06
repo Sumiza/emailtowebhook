@@ -143,7 +143,7 @@ class InboundChecker:
                 webhook_headers['HMAC-Signature'] = hmac_digest
 
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
-            Logger.info(res.text,20)
+            Logger.info(res.text)
 
         else:
             Logger.info(dumps(email_dict,indent=4))
