@@ -6,8 +6,6 @@ services:
     ports:
       - "25:25"
     
-    environment: 
+    environment:
+      BUILTIN_ADDON: discord
       DISCORD_IDTOKEN: '109691893456346445176/Avuqw05Tmoz9pw8-Efeawf4332c-ooZR3_dy5voHRFgaregGDAgrergL8v5wphMQcMWlVD'
-
-    volumes:
-      - ~/addon.py:/addon.py
