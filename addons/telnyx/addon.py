@@ -1,11 +1,17 @@
 """
     Environment Variables Needed:
     TELNYX_KEY = 'KEY4354325243redsgaaegerG_GAefgewafEAWFAGE'
-    TELNYX_FROM = '+11231231234'
 
     Environment Variables Optional:
+    
     SUBJECT_BLACKLIST = 'Invoice, Spam, meeting'  
     TELNYX_TO = '+11231231234'
+
+    If DOMAIN_SENDERS is not set it will use 
+    TELNYX_FROM, if no from number is set
+    it will bounce the email.
+
+    TELNYX_FROM = '+11231231234'
     DOMAIN_SENDERS =  '{
         "example.com":"+11231231234",
         "sub.example.com":"+19991112222"}'
