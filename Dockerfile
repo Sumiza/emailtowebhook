@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED=TRUE
 
 COPY main.py main.py
 COPY docker-entrypoint.sh docker-entrypoint.sh
+COPY addons addons
 
 ENTRYPOINT ["sh","docker-entrypoint.sh"]
 CMD [ "python3","main.py" ]

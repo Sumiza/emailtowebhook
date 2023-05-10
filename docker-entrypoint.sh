@@ -9,4 +9,9 @@ then
                 done
 fi
 
+if [ -n "$BUILTIN_ADDON" ]
+then
+    mv /addons/$BUILTIN_ADDON/addon.py .
+fi
+
 exec "$@"

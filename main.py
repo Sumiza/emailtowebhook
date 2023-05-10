@@ -81,8 +81,8 @@ class InboundChecker:
                         h=session.host_name,verbose=False)
         
         if spf_allow_list:
+            Logger.debug(f'SPF record is {self.spf_answer} : {envelope.mail_from} : {address}')
             if self.spf_answer[0] not in spf_allow_list:
-                Logger.debug(f'550 Refused because SPF record is {self.spf_answer} : {envelope.mail_from} : {address}')
                 return f'550 Refused because SPF record is {self.spf_answer}'
             
         envelope.rcpt_tos.append(address)
@@ -100,8 +100,8 @@ class InboundChecker:
         dkimverify = verify(envelope.content)
         
         if dkim_reject:
+            Logger.debug(f'DKIM is: {dkimverify} : {envelope.mail_from} : {envelope.rcpt_tos[0]}')
             if dkimverify is False:
-                Logger.debug(f'550 DKIM failed email is rejected : {dkimverify} : {envelope.mail_from} : {envelope.rcpt_tos[0]}')
                 return '550 DKIM failed email is rejected'
 
         def payload(part):
@@ -141,9 +141,10 @@ class InboundChecker:
                 hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
                 webhook_headers['HMAC-Time'] = hmactime
                 webhook_headers['HMAC-Signature'] = hmac_digest
-
+            
+            Logger.debug(dumps(email_dict,indent=4))
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
-            Logger.info(res.text,20)
+            Logger.info(res.text)
 
         else:
             Logger.info(dumps(email_dict,indent=4))
