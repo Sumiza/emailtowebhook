@@ -21,7 +21,7 @@
 
 from os import environ
 from json import loads
-from main import genlist,Logger
+from main import genlist
 import re
 
 
@@ -117,8 +117,6 @@ class Addon():
         fromnumber = None
         if from_domains:
             from_domains:dict = loads(from_domains)
-            Logger.debug(from_domains)
-            Logger.debug(self.email_dict['To-RCPT'].casefold())
             for i in from_domains.keys():
                 if self.email_dict['To-RCPT'].casefold().endswith(i.casefold()):
                     fromnumber = from_domains.get(i)
@@ -128,6 +126,10 @@ class Addon():
         if fromnumber is None:
             fromnumber = environ.get('TELNYX_FROM')    
 
+        # If no from return error
+        if fromnumber is None:
+            self.addon_send_response = '550 the target domain or email does not have a sending phone number assgined'
+            return
         # clear email dict
         self.email_dict = {}
 
@@ -135,6 +137,6 @@ class Addon():
         self.email_dict['to'] = tonumber
         self.email_dict['from'] = fromnumber
         self.email_dict['text'] = message
-        Logger.debug(self.email_dict)
+
         self.webhook_headers['Authorization'] = 'Bearer '+ environ.get('TELNYX_KEY')
         self.webhook = 'https://api.telnyx.com/v2/messages'
