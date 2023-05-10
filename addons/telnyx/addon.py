@@ -104,14 +104,18 @@ class Addon():
             tonumber = phoneformat(tonumber)
 
         # Figure out what to use as from number
-        domain_senders = environ.get('DOMAIN_SENDERS',{})
+        from_domains = environ.get('TELNYX_FROM_DOMAINS',{})
+        fromnumber = None
+        if from_domains:
+            from_domains:dict = loads(from_domains)
+            for i in from_domains.keys():
+                if self.email_dict['To-RCPT'].casefold().endswith(i.casefold()):
+                    fromnumber = from_domains.get(i)
+                    break
 
-        if domain_senders:
-            domain_senders:dict = loads(domain_senders)
+        if fromnumber is None:
+            fromnumber = environ.get('TELNYX_FROM')    
 
-        fromnumber  = domain_senders.get(
-            self.email_dict['To-RCPT'].casefold().split('@')[1],environ.get('TELNYX_FROM'))
-        
         # clear email dict
         self.email_dict = {}
 
@@ -124,14 +128,4 @@ class Addon():
         self.webhook = 'https://api.telnyx.com/v2/messages'
 
 
-        from_domains = environ.get('TELNYX_FROM_DOMAINS',{})
-        fromnumber = None
-        if from_domains:
-            from_domains:dict = loads(from_domains)
-            for i in from_domains.keys():
-                if self.email_dict['To-RCPT'].casefold().endswith(i.casefold()):
-                    fromnumber = from_domains.get(i)
-                    break
-
-        if fromnumber is None:
-            fromnumber = environ.get('TELNYX_FROM')   
+        
