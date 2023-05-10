@@ -13,6 +13,6 @@ services:
       TELNYX_TO: '+11231231234'
 
       # SUBJECT_BLACKLIST: 'Invoice, Spam, meeting'
-      # DOMAIN_SENDERS: '{"example.com":"+11231231234","sub.example.com":"+19991112222"}'
+      # TELNYX_FROM_DOMAINS: '{"example.com":"+11231231234","sub.example.com":"+19991112222"}'
 
 
