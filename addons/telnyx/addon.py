@@ -10,6 +10,8 @@
         "example.com":"+11231231234",
         "sub.example.com":"+19991112222"}'
 
+    REGEX_SUB_REMOVE = '^Hello!\n\n'
+    
     If an environment variable is not set for TELNYX_TO
     it will try and pull the number from the first part
     of the to email.
@@ -20,6 +22,7 @@
 from os import environ
 from json import loads
 from main import genlist
+import re
 
 class Addon():
     def __init__(self,
@@ -75,16 +78,21 @@ class Addon():
 
             return '\n'.join(output).strip()
         
-        # Message to send  as text
+        # Message to send as text
         message = removereply(message)
 
-        # raise an error if message is longer than 3 sms texts
+        # Run regex 
+        subregex = environ.get('REGEX_SUB_REMOVE',None)
+        if subregex:
+            message = re.sub(fr"{subregex}", "", message, 0, re.MULTILINE)
+
+        # Raise an error if message is longer than 3 sms texts
         length_limit = 160*3
         message_length = len(message)
         if message_length > length_limit:
             raise ValueError(f'Message is too long: {message_length}, limit is {length_limit}')
 
-        # only for canadian and US numbers
+        # Only for canadian and US numbers
         def phoneformat(phonenumber):
             output = ''
             for i in str(phonenumber):
@@ -96,7 +104,7 @@ class Addon():
                 return '+'+output
             return output
 
-        # figure out where to send text message to
+        # Figure out where to send text message to
         tonumber = environ.get('TELNYX_TO',None)
 
         if tonumber is None: 
@@ -113,6 +121,7 @@ class Addon():
                     fromnumber = from_domains.get(i)
                     break
 
+        # If no match found used the TELNYX_FROM
         if fromnumber is None:
             fromnumber = environ.get('TELNYX_FROM')    
 
@@ -126,6 +135,3 @@ class Addon():
 
         self.webhook_headers['Authorization'] = 'Bearer '+ environ.get('TELNYX_KEY')
         self.webhook = 'https://api.telnyx.com/v2/messages'
-
-
-        
