@@ -122,3 +122,16 @@ class Addon():
 
         self.webhook_headers['Authorization'] = 'Bearer '+ environ.get('TELNYX_KEY')
         self.webhook = 'https://api.telnyx.com/v2/messages'
+
+
+        from_domains = environ.get('TELNYX_FROM_DOMAINS',{})
+        fromnumber = None
+        if from_domains:
+            from_domains:dict = loads(from_domains)
+            for i in from_domains.keys():
+                if self.email_dict['To-RCPT'].casefold().endswith(i.casefold()):
+                    fromnumber = from_domains.get(i)
+                    break
+
+        if fromnumber is None:
+            fromnumber = environ.get('TELNYX_FROM')   
