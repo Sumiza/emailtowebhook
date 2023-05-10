@@ -21,8 +21,9 @@
 
 from os import environ
 from json import loads
-from main import genlist
+from main import genlist,Logger
 import re
+
 
 class Addon():
     def __init__(self,
@@ -116,6 +117,8 @@ class Addon():
         fromnumber = None
         if from_domains:
             from_domains:dict = loads(from_domains)
+            Logger.debug(from_domains)
+            Logger.debug(self.email_dict['To-RCPT'].casefold())
             for i in from_domains.keys():
                 if self.email_dict['To-RCPT'].casefold().endswith(i.casefold()):
                     fromnumber = from_domains.get(i)
@@ -132,6 +135,6 @@ class Addon():
         self.email_dict['to'] = tonumber
         self.email_dict['from'] = fromnumber
         self.email_dict['text'] = message
-
+        Logger.debug(self.email_dict)
         self.webhook_headers['Authorization'] = 'Bearer '+ environ.get('TELNYX_KEY')
         self.webhook = 'https://api.telnyx.com/v2/messages'

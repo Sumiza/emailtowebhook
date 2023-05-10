@@ -141,7 +141,8 @@ class InboundChecker:
                 hmac_digest = digest(f'{hmac_secret+hmactime}'.encode(),dumps(email_dict).encode(),sha256).hex()
                 webhook_headers['HMAC-Time'] = hmactime
                 webhook_headers['HMAC-Signature'] = hmac_digest
-
+            
+            Logger.debug(dumps(email_dict,indent=4))
             res = post(webhook,json=email_dict,headers=webhook_headers,timeout=90)
             Logger.info(res.text)
 
