@@ -16,7 +16,7 @@ fi
 
 if [ -n "$TLS_CERT_HOST" ]
 then
-    openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 3000 -nodes -subj "/CN=$TLS_CERT_HOST"
+    openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 3000 -nodes -subj "/CN=$TLS_CERT_HOST" 2>/dev/null
 fi
 
 exec "$@"
