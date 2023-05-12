@@ -9,6 +9,7 @@ services:
     environment: # uncomment and change the ones you need
       IDENT: My Test SMTP Server
       # HOST: '0.0.0.0'
+      # HOST_NAME: 'mail.example.com'
       # PORT: 25
       # TARGET_EMAIL: .com
       # SOURCE_EMAIL: .com
@@ -21,6 +22,9 @@ services:
       # HMAC_SECRET: SuperSecret
       # PIP_INSTALL: 'urlrequest webhookbin'
       # BUILTIN_ADDON: telnyx
+      # TLS_REQUIRED: True
+      # TLS_CERT_HOST: mail.example.com
+
 
     # volumes: # if need the addon
     #   - ~/addon.py:/addon.py
