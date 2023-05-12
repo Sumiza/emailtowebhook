@@ -152,7 +152,24 @@ class InboundChecker:
         return '250 Message accepted'
 
 if __name__ == '__main__':
-    controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
+    import ssl
+    host_name = environ.get('HOST_NAME',None)
+    starttls_req = bool(environ.get('TLS_REQUIRED',False))
+    try:
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context.load_cert_chain('cert.pem', 'key.pem')
+    except:
+        context = None
+        Logger.debug("TLS not loaded")
+
+    controller = Controller(InboundChecker(),
+                            server_hostname=host_name,
+                            hostname=host,
+                            port=port,
+                            ident=ident,
+                            data_size_limit=email_size,
+                            tls_context=context,
+                            require_starttls=starttls_req)
     controller.start()
     while True:
         sleep(100)
