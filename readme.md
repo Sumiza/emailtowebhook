@@ -21,6 +21,7 @@ To keep the dependencies up to date a new build is made daily and tagged as late
 The following environment variables can  be set to configure the SMTP server:
 
 - `HOST`: The IP address or hostname to bind the SMTP server to. Defaults to `0.0.0.0`.
+- `HOST_NAME`: The hostname for the SMTP server if it can not be set by host because of nat or running a docker container not on the host network.
 - `PORT`: The port number to bind the SMTP server to. Defaults to `25`.
 - `TARGET_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are addressed to these email addresses. It uses .endswith and accepts a list seperated by `","` `'.com, @example.com, example@example.com'` or a single email `'example@example.com'`
 - `SOURCE_EMAIL`: An optional email address to filter incoming emails by. If set, the SMTP server will only accept emails that are sent from this email address. It uses .endswith and accepts a list seperated by `","` `'.com, @example.com, example@example.com'` or a single email `'example@example.com'`
@@ -33,6 +34,10 @@ The following environment variables can  be set to configure the SMTP server:
 - `WEBHOOK_HEADERS`: An optional JSON-formatted string containing a dictionary of headers to include in the webhook request. If set, the headers in this dictionary will be added to the webhook request.`'{"Test-Header":"Hi There","Test-Header2":"4"}'`
 - `HMAC_SECRET`: An optional string containing a secret key to use for HMAC validation of the webhook request. If set, the webhook request will include an HMAC signature for validation.
 - `PIP_INSTALL`: An optional string containing any projects you need to download with pip for addon scripts `'webhookbin urlrequest secondstotext'`
+- `BUILTIN_ADDON`: An optional string containing any of the built in addons
+- `TLS_REQUIRED`: An optional string that sets if TLS is required to receive emails
+- `TLS_CERT_HOST`: An optional string that will generate a self signed certificate with the hostname provided
+
 
 
 ## Usage

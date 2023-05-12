@@ -25,12 +25,15 @@ services:
       # TLS_REQUIRED: True
       # TLS_CERT_HOST: mail.example.com
 
-
-    # volumes: # if need the addon
-    #   - ~/addon.py:/addon.py
+    # volumes: # bring in your own cert
+    #   - ~/fullchain.pem:/cert.pem
+    #   - ~/privkey.pem:/key.pem
 
     # deploy:
     #   restart_policy:
     #     condition: any
     #     delay: 5s
     #     window: 120s
+
+    # volumes: # if need the addon
+    #   - ~/addon.py:/addon.py
