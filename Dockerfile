@@ -1,12 +1,12 @@
 FROM python:alpine
 
-
-RUN pip install --upgrade pip
-RUN pip install dnspython aiosmtpd pyspf dkimpy requests
-
 EXPOSE 25
 
 ENV PYTHONUNBUFFERED=TRUE
+
+RUN apk add --no-cache openssl
+RUN pip install --upgrade pip
+RUN pip install dnspython aiosmtpd pyspf dkimpy requests
 
 COPY main.py main.py
 COPY docker-entrypoint.sh docker-entrypoint.sh
