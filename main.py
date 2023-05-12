@@ -13,6 +13,7 @@ from dkim import verify
 from time import sleep, time
 from hashlib import sha256
 from hmac import digest
+import ssl
 
 loggerlevel = environ.get('LOGGER','INFO').upper()
 if loggerlevel == 'INFO':
@@ -56,6 +57,15 @@ def sendmessage(message,level):
 class Logger: # TODO add write to file, keep format the same as logging
     def info(message): sendmessage(message,20)
     def debug(message): sendmessage(message,10)
+
+host_name = environ.get('HOST_NAME',None)
+starttls_req = bool(environ.get('TLS_REQUIRED',False))
+try:
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain('cert.pem', 'key.pem')
+except:
+    context = None
+    Logger.debug("TLS not loaded")
 
 class InboundChecker:
     async def handle_RCPT(self, server, session: SMTPSession, envelope: SMTPEnvelope, address :str, rcpt_options):
@@ -152,7 +162,15 @@ class InboundChecker:
         return '250 Message accepted'
 
 if __name__ == '__main__':
-    controller = Controller(InboundChecker(),hostname=host,port=port,ident=ident,data_size_limit=email_size)
+
+    controller = Controller(InboundChecker(),
+                            server_hostname=host_name,
+                            hostname=host,
+                            port=port,
+                            ident=ident,
+                            data_size_limit=email_size,
+                            tls_context=context,
+                            require_starttls=starttls_req)
     controller.start()
     while True:
         sleep(100)
