@@ -15,5 +15,9 @@ services:
 
       # SUBJECT_BLACKLIST: 'Invoice, Spam, meeting'
       # TELNYX_FROM_DOMAINS: '{"@example.com":"+11231231234","@sub.example.com":"+19991112222"}'
+    
+    # volumes: # bring in your own cert
+    #   - ~/fullchain.pem:/cert.pem
+    #   - ~/privkey.pem:/key.pem
 
 
