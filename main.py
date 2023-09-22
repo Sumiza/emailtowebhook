@@ -39,6 +39,7 @@ source_email = genlist(environ.get('SOURCE_EMAIL',None))
 spf_allow_list = genlist(environ.get('SPF_ALLOW_LIST',None))
 
 dkim_reject = bool(environ.get('DKIM_REJECT',False))
+dkim_minkey = environ.get('DKIM_MIN_KEY',1024)
 
 ident = environ.get('IDENT','')
 email_size = int(environ.get('EMAIL_SIZE',5048576))
@@ -107,7 +108,7 @@ class InboundChecker:
 
         email:MIMEPart = Parser(policy=default).parsestr(envelope.content.decode('utf8', errors='replace'))
 
-        dkimverify = verify(envelope.content)
+        dkimverify = verify(envelope.content,minkey=dkim_minkey)
         
         if dkim_reject:
             Logger.debug(f'DKIM is: {dkimverify} : {envelope.mail_from} : {envelope.rcpt_tos[0]}')
