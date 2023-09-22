@@ -15,6 +15,7 @@ services:
       # SOURCE_EMAIL: .com
       # SPF_ALLOW_LIST: 'pass, permerror, fail, temperror, softfail, none, neutral'
       # DKIM_REJECT: True
+      # DKIM_MIN_KEY: 1024
       # EMAIL_SIZE: 5048576
       # LOGGER: INFO
       # WEBHOOK_URL: https://webhookbin.net/v1/bin/4142fd66-fca8-4c36-bc04-cfa17c092a0d
