@@ -38,7 +38,7 @@ The following environment variables can  be set to configure the SMTP server:
 - `BUILTIN_ADDON`: An optional string containing any of the built in addons
 - `TLS_CERT_HOST`: An optional string that will generate a self signed certificate with the hostname provided.
 - `TLS_REQUIRED`: An optional string that sets if TLS is required to receive emails, needs a premade certificate to be added or generate a self signed one with TLS_CERT_HOST.
-
+- `DOWNLOAD_ADDON`: An optional url of a addon.py file that will be downloaded with wget.
 
 
 ## Usage
