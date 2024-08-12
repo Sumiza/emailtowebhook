@@ -69,6 +69,8 @@ class Addon():
         
         if binid is not None:
             self.webhook = f'https://webhookbin.net/v1/bin/{binid}'
+        else:
+            self.webhook = None #needs to be cleared for main script
 
         # self.sender() #to call the custom sender
 
