@@ -60,19 +60,21 @@ class Addon():
         self.email_dict['subject'] = subject
         self.email_dict['date'] = date
 
-        if binauth:
-            self.webhook_headers = {
-                "Binauth": binauth,
+        self.webhook_headers = {
                 "HideIp": "true",
                 "Message_Source":"Email"}
-
-        self.webhook = f'https://webhookbin.net/v1/bin/{binid}'
+        
+        if binauth:
+            self.webhook_headers["Binauth"] = binauth
+        
+        if binid is not None:
+            self.webhook = f'https://webhookbin.net/v1/bin/{binid}'
 
         # self.sender() #to call the custom sender
 
     def sender(self):
         """
-            if this called then you need to take care of sending by yourself
+            if this is called then you need to take care of sending by yourself
             this can be to a database, webhook, email.. etc
             self.addon_send_response has to be a smtp response if it stays None
             the default sender will be called after this function.
