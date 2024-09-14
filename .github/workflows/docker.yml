@@ -18,7 +18,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Check out the repo
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
     - name: log into docker
       run: |
@@ -28,20 +35,25 @@ jobs:
     - name: build and tag daily
       if: ${{ github.event_name == 'schedule' }}
       run: >
-        docker build . 
+        docker buildx build 
+        --platform linux/amd64,linux/arm64
+        -f ./Dockerfile 
         -t $DOCKER_USER/${{ github.event.repository.name }}:latest 
         -t $DOCKER_USER/${{ github.event.repository.name }}:$(date --rfc-3339=date)
+        .
+        --push
 
     - name: build and tag on push or pull
       if: ${{ github.event_name != 'schedule' }}
       run: >
-        docker build . 
+        docker buildx build 
+        --platform linux/amd64,linux/arm64
+        -f ./Dockerfile 
         -t $DOCKER_USER/${{ github.event.repository.name }}:latest
         -t $DOCKER_USER/${{ github.event.repository.name }}:${{ github.head_ref || github.ref_name }} 
         -t $DOCKER_USER/${{ github.event.repository.name }}:${{ github.sha }} 
-
-    - name: push build to docker hub
-      run: docker push $DOCKER_USER/${{ github.event.repository.name }} --all-tags
+        .
+        --push
 
     - name: log out of docker
       run: docker logout
